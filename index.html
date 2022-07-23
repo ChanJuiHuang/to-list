@@ -1,0 +1,122 @@
+<html>
+    <head>
+        <title>Todo List</title>
+    </head>
+    <body>
+        <div>
+            <h3>Todo List 使用說明</h3>
+            <p>
+                輸入框輸入的資訊可以是新增todo item或更新todo item的內容。
+                <br />
+                點擊create todo item為新增todo item。
+                <br />
+                點擊update todo item為更新todo item。更新按鈕只有新增todo item之後才看得到
+                <br />
+                點擊delete todo item為刪除todo item。刪除按鈕只有新增todo item之後才看得到
+                <br />
+                點擊clear all todo items為刪除所有todo items
+            </p>
+        </div>
+        <div>
+            <input type="text" id="todo-item">
+            <button id="create-todo-item-button">
+                create todo item
+            </button>
+        </div>
+        <br/>
+        <div>
+            <button id="delete-all-todo-items-button">
+                clear all todo items
+            </button>
+        </div>
+        <ol id="todo-list">
+        </ol>
+    </body>
+</html>
+
+<script>
+    const createTodoItem = (todoItem) => {
+        const todoItems = getTodoItems()
+        todoItems.push({
+            content: todoItem,
+            is_finished: false,
+        })
+        localStorage.setItem('todo_items', JSON.stringify(todoItems))
+    }
+    const getTodoItems = () => {
+        const todoItemsJson = localStorage.getItem('todo_items')
+
+        return JSON.parse(todoItemsJson)
+    }
+    const updateTodoItem = (todoItemId) => {
+        const todoItem = document.querySelector('#todo-item')
+        const todoItems = getTodoItems()
+        todoItems[todoItemId].content = todoItem.value
+        localStorage.setItem('todo_items', JSON.stringify(todoItems))
+    }
+    const deleteTodoItem = (todoItemId) => {
+        const todoItems = getTodoItems()
+        todoItems.splice(todoItemId, 1)
+        localStorage.setItem('todo_items', JSON.stringify(todoItems))
+    }
+    const deleteAllTodoItems = () => {
+        localStorage.removeItem('todo_items')
+        localStorage.setItem('todo_items', JSON.stringify([]))
+    }
+    const indexTodoItems = () => {
+        const todoList = document.querySelector('#todo-list')
+        const todoItems = getTodoItems()
+        todoList.innerHTML = ''
+        todoItems.forEach((todoItem, index) => {
+            const li = document.createElement('li');
+            const liNode = document.createTextNode(todoItem.content)
+            const buttonForUpdate = document.createElement('button');
+            const buttonNodeForUpdate = document.createTextNode('update todo item');
+            const buttonForDelete = document.createElement('button');
+            const buttonNodeForDelete = document.createTextNode('delete todo item');
+
+            buttonForUpdate.appendChild(buttonNodeForUpdate)
+            buttonForUpdate.setAttribute('style', 'margin: 8px')
+            buttonForUpdate.setAttribute('id', `button-update-${index}`)
+            buttonForUpdate.addEventListener('click', function() {
+                updateTodoItem(this.id.split('-')[2])
+                indexTodoItems()
+            })
+            buttonForDelete.appendChild(buttonNodeForDelete)
+            buttonForDelete.setAttribute('style', 'margin: 8px')
+            buttonForDelete.setAttribute('id', `button-delete-${index}`)
+            buttonForDelete.addEventListener('click', function() {
+                deleteTodoItem(this.id.split('-')[2])
+                indexTodoItems()
+            })
+            li.setAttribute('id', `li-${index}`)
+            li.appendChild(liNode)
+            li.appendChild(buttonForUpdate)
+            li.appendChild(buttonForDelete)
+            todoList.appendChild(li)
+        })
+    }
+    const init = () => {
+        const todoItems = localStorage.getItem('todo_items')
+
+        if (todoItems === null) {
+            localStorage.setItem('todo_items', JSON.stringify([]))
+        }
+        indexTodoItems()
+        console.log(JSON.parse(todoItems))
+    }
+    init()
+
+    const createTodoButton = document.querySelector('#create-todo-item-button')
+    createTodoButton.addEventListener('click', () => {
+        const todoItem = document.querySelector('#todo-item')
+        createTodoItem(todoItem.value)
+        indexTodoItems()
+    })
+
+    const deleteAllTodoButton = document.querySelector('#delete-all-todo-items-button')
+    deleteAllTodoButton.addEventListener('click', () => {
+        deleteAllTodoItems()
+        indexTodoItems()
+    })
+</script>
