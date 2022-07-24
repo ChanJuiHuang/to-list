@@ -29,8 +29,8 @@
                 clear all todo items
             </button>
         </div>
-        <ol id="todo-list">
-        </ol>
+        <div id="todo-list" style="margin: 20px">
+        </div>
     </body>
 </html>
 
@@ -68,12 +68,13 @@
         const todoItems = getTodoItems()
         todoList.innerHTML = ''
         todoItems.forEach((todoItem, index) => {
-            const li = document.createElement('li');
-            const liNode = document.createTextNode(todoItem.content)
+            const div = document.createElement('div');
+            const divNode = document.createTextNode(todoItem.content)
             const buttonForUpdate = document.createElement('button');
             const buttonNodeForUpdate = document.createTextNode('update todo item');
             const buttonForDelete = document.createElement('button');
             const buttonNodeForDelete = document.createTextNode('delete todo item');
+            const checkBox = document.createElement('input');
 
             buttonForUpdate.appendChild(buttonNodeForUpdate)
             buttonForUpdate.setAttribute('style', 'margin: 8px')
@@ -89,11 +90,27 @@
                 deleteTodoItem(this.id.split('-')[2])
                 indexTodoItems()
             })
-            li.setAttribute('id', `li-${index}`)
-            li.appendChild(liNode)
-            li.appendChild(buttonForUpdate)
-            li.appendChild(buttonForDelete)
-            todoList.appendChild(li)
+            checkBox.setAttribute('type', 'checkbox')
+            checkBox.setAttribute('id', `checkbox-${index}`)
+            checkBox.addEventListener('change', function(event) {
+                const todoItems = getTodoItems()
+                todoItems[index].is_finished = false
+
+                if (event.target.checked) {
+                    todoItems[index].is_finished = true
+                }
+                localStorage.setItem('todo_items', JSON.stringify(todoItems))
+                indexTodoItems()
+            })
+
+            if (todoItem.is_finished) {
+                checkBox.setAttribute('checked', true)
+            }
+            div.appendChild(checkBox)
+            div.appendChild(divNode)
+            div.appendChild(buttonForUpdate)
+            div.appendChild(buttonForDelete)
+            todoList.appendChild(div)
         })
     }
     const init = () => {
